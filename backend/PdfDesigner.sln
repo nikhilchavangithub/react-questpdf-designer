@@ -1,0 +1,10 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfDesigner.Api", "PdfDesigner.Api\PdfDesigner.Api.csproj", "{8C4B68AC-1001-4B86-95E8-05778C42EE01}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfDesigner.Api.Tests", "PdfDesigner.Api.Tests\PdfDesigner.Api.Tests.csproj", "{7A93D589-D8D6-4B28-A0E5-6D2EBED48FA6}"
+EndProject
+Global
+EndGlobal
