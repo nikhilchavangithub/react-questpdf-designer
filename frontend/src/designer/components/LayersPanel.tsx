@@ -11,7 +11,10 @@ export function LayersPanel() {
       <div className="space-y-1">
         {elements.map((element) => (
           <div key={element.id} className={`flex items-center justify-between rounded-md border px-2 py-2 text-sm ${selectedElementId === element.id ? 'border-blue-300 bg-blue-50' : 'border-transparent hover:bg-slate-50'}`}>
-            <button className="min-w-0 flex-1 truncate text-left" onClick={() => selectElement(element.id)}>{element.name || element.id}<span className="ml-2 text-xs text-slate-400">{element.type}</span></button>
+            <button className="min-w-0 flex-1 truncate text-left" onClick={() => selectElement(element.id)}>
+              {element.name || element.id}
+              <span className="ml-2 text-xs text-slate-400">{element.type}{'page' in element ? ` · P${element.page ?? 1}` : ''}</span>
+            </button>
             <button className="text-xs text-slate-400 hover:text-red-600" onClick={() => deleteElement(element.id)}>Delete</button>
           </div>
         ))}

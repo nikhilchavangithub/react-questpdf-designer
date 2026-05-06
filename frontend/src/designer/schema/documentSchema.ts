@@ -14,6 +14,7 @@ export type DocumentSchema = {
   version: string;
   name: string;
   page: PageSettings;
+  pageCount: number;
   mode: 'absolute' | 'flow' | 'mixed';
   elements: ElementNode[];
   data?: Record<string, unknown>;
