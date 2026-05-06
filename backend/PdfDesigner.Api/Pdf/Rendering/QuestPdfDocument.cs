@@ -12,23 +12,28 @@ public sealed class QuestPdfDocument(DocumentSchema schema, QuestPdfRenderer ren
     public void Compose(IDocumentContainer container)
     {
         var context = new RenderContext(schema);
-        container.Page(page =>
+        var pageCount = Math.Max(1, schema.PageCount);
+        for (var pageNumber = 1; pageNumber <= pageCount; pageNumber++)
         {
-            page.Size(schema.Page.Size == "A4" ? PageSizes.A4 : PageSizes.Letter);
-            page.Margin(0);
-            page.Content().Layers(layers =>
+            var currentPage = pageNumber;
+            container.Page(page =>
             {
-                layers.PrimaryLayer().Background(Colors.White);
-                foreach (var element in schema.Elements.Where(element => !element.Hidden))
+                page.Size(schema.Page.Size == "A4" ? PageSizes.A4 : PageSizes.Letter);
+                page.Margin(0);
+                page.Content().Layers(layers =>
                 {
-                    layers.Layer()
-                        .TranslateX(element.X ?? 0)
-                        .TranslateY(element.Y ?? 0)
-                        .Width(element.Width ?? 100)
-                        .Height(element.Height ?? 20)
-                        .Element(inner => renderer.RenderNode(inner, element, context));
-                }
+                    layers.PrimaryLayer().Background(Colors.White);
+                    foreach (var element in schema.Elements.Where(element => !element.Hidden && (element.Page ?? 1) == currentPage))
+                    {
+                        layers.Layer()
+                            .TranslateX(element.X ?? 0)
+                            .TranslateY(element.Y ?? 0)
+                            .Width(element.Width ?? 100)
+                            .Height(element.Height ?? 20)
+                            .Element(inner => renderer.RenderNode(inner, element, context));
+                    }
+                });
             });
-        });
+        }
     }
 }

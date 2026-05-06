@@ -12,6 +12,7 @@ public sealed partial class SchemaValidator
     {
         var errors = new List<string>();
         if (string.IsNullOrWhiteSpace(schema.Version)) errors.Add("Document version is required.");
+        if (schema.PageCount <= 0) errors.Add("Page count must be positive.");
         if (schema.Page is null) errors.Add("Page settings are required.");
         else
         {
@@ -40,6 +41,7 @@ public sealed partial class SchemaValidator
             {
                 if (node.X is null || node.Y is null || node.Width is null || node.Height is null) errors.Add($"{nodePath} requires x, y, width, and height.");
                 if (node.Width <= 0 || node.Height <= 0) errors.Add($"{nodePath} width and height must be positive.");
+                if (node.Page is not null && node.Page <= 0) errors.Add($"{nodePath}.page must be positive.");
             }
 
             if (node.Type == "text" && node.Text is null) errors.Add($"{nodePath}.text is required for text elements.");

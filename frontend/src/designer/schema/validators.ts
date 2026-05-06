@@ -32,6 +32,7 @@ export const elementSchema: z.ZodTypeAny = z.lazy(() => z.discriminatedUnion('ty
 export const documentSchemaValidator = z.object({
   version: z.string().min(1),
   name: z.string().min(1),
+  pageCount: z.number().int().positive(),
   mode: z.enum(['absolute', 'flow', 'mixed']),
   page: z.object({ size: z.enum(['Letter', 'A4']), width: z.number().positive(), height: z.number().positive(), margin: spacingSchema, unit: z.enum(['pt', 'px']) }),
   elements: z.array(elementSchema),
@@ -44,7 +45,13 @@ export const documentSchemaValidator = z.object({
     ids.add(node.id);
     if (Array.isArray(node.children)) visit(node.children as Array<{ id: string; children?: unknown }>);
   });
-  visit(doc.elements);
+  const elements = doc.elements as Array<{ page?: number | null; id: string; children?: unknown }>;
+  visit(elements);
+  elements.forEach((element, index) => {
+    if ('page' in element && element.page != null && element.page > doc.pageCount) {
+      ctx.addIssue({ code: 'custom', message: `Element page ${element.page} exceeds pageCount ${doc.pageCount}`, path: ['elements', index, 'page'] });
+    }
+  });
 });
 
 export const validateDocument = (template: unknown) => documentSchemaValidator.safeParse(template);
