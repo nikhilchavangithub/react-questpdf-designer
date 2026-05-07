@@ -4,6 +4,8 @@ import { ptToPx, pxToPt } from '../utils/units';
 import { ElementView } from './ElementView';
 
 type PdfPageProps = { pageNumber: number };
+const GRID_SIZE_PT = 8;
+const snap = (value: number) => Math.round(value / GRID_SIZE_PT) * GRID_SIZE_PT;
 
 export function PdfPage({ pageNumber }: PdfPageProps) {
   const template = useDesignerStore((state) => state.template);
@@ -12,7 +14,13 @@ export function PdfPage({ pageNumber }: PdfPageProps) {
   const selectedPage = useDesignerStore((state) => state.selectedPage);
   const setSelectedPage = useDesignerStore((state) => state.setSelectedPage);
   const [dropActive, setDropActive] = useState(false);
+  const [dropPoint, setDropPoint] = useState<{ x: number; y: number }>();
   const pageElements = template.elements.filter((element) => ('page' in element ? (element.page ?? 1) : 1) === pageNumber);
+
+  const updateDropPoint = (event: DragEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setDropPoint({ x: snap(pxToPt(event.clientX - rect.left)), y: snap(pxToPt(event.clientY - rect.top)) });
+  };
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -22,15 +30,16 @@ export function PdfPage({ pageNumber }: PdfPageProps) {
     const rect = event.currentTarget.getBoundingClientRect();
     addElement(type as 'text' | 'box' | 'line' | 'image' | 'table', {
       page: pageNumber,
-      x: pxToPt(event.clientX - rect.left),
-      y: pxToPt(event.clientY - rect.top)
+      x: snap(pxToPt(event.clientX - rect.left)),
+      y: snap(pxToPt(event.clientY - rect.top))
     });
     setSelectedPage(pageNumber);
+    setDropPoint(undefined);
   };
 
   return (
     <div
-      className={`relative overflow-hidden bg-white shadow-2xl ring-1 ${selectedPage === pageNumber ? 'ring-blue-400' : 'ring-slate-300'}`}
+      className={`pdf-page ${selectedPage === pageNumber ? 'pdf-page-active' : ''}`}
       style={{ width: ptToPx(template.page.width), height: ptToPx(template.page.height) }}
       onMouseDown={() => {
         selectElement(undefined);
@@ -41,13 +50,21 @@ export function PdfPage({ pageNumber }: PdfPageProps) {
         event.preventDefault();
         event.dataTransfer.dropEffect = 'copy';
         setDropActive(true);
+        updateDropPoint(event);
       }}
-      onDragLeave={() => setDropActive(false)}
+      onDragLeave={() => {
+        setDropActive(false);
+        setDropPoint(undefined);
+      }}
       onDrop={handleDrop}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(#e5e7eb_1px,transparent_1px),linear-gradient(90deg,#e5e7eb_1px,transparent_1px)] bg-[size:17px_17px] opacity-30" />
-      <div className="absolute left-3 top-3 rounded-full bg-slate-900/85 px-2 py-1 text-[11px] font-semibold text-white">Page {pageNumber}</div>
-      {dropActive ? <div className="pointer-events-none absolute inset-0 border-2 border-dashed border-blue-400 bg-blue-100/40" /> : null}
+      <div className="page-grid" />
+      <div className="page-badge">Page {pageNumber}</div>
+      {dropActive ? (
+        <div className="drop-preview">
+          <span>Drop on grid{dropPoint ? ` · X ${dropPoint.x}pt Y ${dropPoint.y}pt` : ''}</span>
+        </div>
+      ) : null}
       {pageElements.map((element) => <ElementView key={element.id} element={element} />)}
     </div>
   );

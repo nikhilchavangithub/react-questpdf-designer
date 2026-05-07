@@ -5,29 +5,33 @@ const tools = [
   { type: 'box', label: 'Box', description: 'Background and border' },
   { type: 'line', label: 'Line', description: 'Horizontal divider' },
   { type: 'image', label: 'Image', description: 'Placeholder frame' },
-  { type: 'table', label: 'Table', description: 'Configurable rows and columns' }
+  { type: 'table', label: 'Table', description: 'Rows, columns, and presets' }
 ] as const;
 
 export function Toolbox() {
   const addElement = useDesignerStore((state) => state.addElement);
   return (
-    <section>
-      <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Toolbox</h2>
-      <p className="mb-3 text-xs text-slate-500">Click to add to the selected page, or drag onto a page to place it exactly.</p>
-      <div className="space-y-2">
+    <section className="panel-section" aria-labelledby="toolbox-title">
+      <h2 id="toolbox-title" className="section-eyebrow">Place components</h2>
+      <p className="helper-text">Click to add to the selected page, or drag onto the page to place precisely. Elements snap to the 8pt grid.</p>
+      <div className="tool-list">
         {tools.map((tool) => (
           <button
             key={tool.type}
+            type="button"
             draggable
-            className="w-full rounded-lg border border-slate-200 bg-white p-3 text-left shadow-sm transition hover:border-blue-300 hover:bg-blue-50"
+            className="tool-card"
             onClick={() => addElement(tool.type)}
             onDragStart={(event) => {
               event.dataTransfer.effectAllowed = 'copy';
               event.dataTransfer.setData('application/pdf-designer-element', tool.type);
             }}
           >
-            <div className="text-sm font-semibold text-slate-900">{tool.label}</div>
-            <div className="text-xs text-slate-500">{tool.description}</div>
+            <span className="tool-icon" aria-hidden="true">{tool.label.slice(0, 1)}</span>
+            <span>
+              <strong>{tool.label}</strong>
+              <small>{tool.description}</small>
+            </span>
           </button>
         ))}
       </div>
